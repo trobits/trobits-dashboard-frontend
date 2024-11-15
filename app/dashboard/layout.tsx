@@ -60,13 +60,24 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 <nav className="w-full p-4">
                     <ul className="space-y-4">
                         <li>
+                            <Link href="/dashboard/shiblunc" passHref>
+                                <Button
+                                    className={`w-full justify-start text-left px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors ${pathname === '/dashboard/allblogs' ? 'bg-teal-700 text-white' : 'bg-gray-800 text-gray-300'
+                                        }`}
+                                    onClick={handleMenuItemClick}
+                                >
+                                    Shib & Lunc
+                                </Button>
+                            </Link>
+                        </li>
+                        <li>
                             <Link href="/dashboard/allblogs" passHref>
                                 <Button
                                     className={`w-full justify-start text-left px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors ${pathname === '/dashboard/allblogs' ? 'bg-teal-700 text-white' : 'bg-gray-800 text-gray-300'
                                         }`}
                                     onClick={handleMenuItemClick}
                                 >
-                                    Show All Blogs
+                                    All Blogs
                                 </Button>
                             </Link>
                         </li>
@@ -88,7 +99,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                                         }`}
                                     onClick={handleMenuItemClick}
                                 >
-                                    All Subscriber
+                                    Manage Users
                                 </Button>
                             </Link>
                         </li>

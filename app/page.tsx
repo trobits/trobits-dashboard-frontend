@@ -21,6 +21,7 @@ export default function AdminLoginPage() {
         email: email.value,
         password: password.value,
       }).unwrap();
+      console.log(result)
 
       if (result?.error) {
         toast.error(result.error.response?.data?.message || "Login failed");
