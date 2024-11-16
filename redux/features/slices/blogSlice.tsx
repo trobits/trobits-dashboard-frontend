@@ -1,48 +1,50 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { Article } from "@/app/dashboard/layout";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-
-type TBlog = {
-    id: string;
-    blogTitle: string;
-    blogImage?: string;
-    blogContent: string;
-    category: string;
-    comments?: any;
-    createdAt?: Date;
-    updatedAt?: Date;
-};
-const initialState: Partial<TBlog> = {
-    blogContent: "",
-    blogTitle: "",
-    category: "",
+const initialState: Partial<Article> = {
+    title: "",
+    content: "",
     id: "",
-    blogImage: "",
-}
+    image: "",
+    authorId: "",
+    likeCount: 0,
+    likers: [],
+    comments: [],
+    createdAt: undefined,
+    updatedAt: undefined,
+};
 
-const blogSlice = createSlice({
-    name: "blog",
+const articleSlice = createSlice({
+    name: "article",
     initialState,
     reducers: {
-        setEditableBlog: (state, action: PayloadAction<TBlog>) => {
-            const blog = action.payload;
-            state.blogContent = blog.blogContent;
-            state.blogTitle = blog.blogTitle;
-            state.category = blog.category;
-            state.id = blog.id;
-            state.blogImage = blog.blogImage;
+        setEditableArticle: (state, action: PayloadAction<Article>) => {
+            const article = action.payload;
+            state.title = article.title;
+            state.content = article.content;
+            state.id = article.id;
+            state.image = article.image;
+            state.authorId = article.authorId;
+            // state.likeCount = article.likeCount;
+            // state.likers = article.likers;
+            // state.comments = article.comments;
+            // state.createdAt = article.createdAt;
+            // state.updatedAt = article.updatedAt;
         },
-        clearSetEditableBlog: (state) => {
-            state.blogContent = "";
-            state.blogTitle = "";
-            state.category = "";
+        clearEditableArticle: (state) => {
+            state.title = "";
+            state.content = "";
             state.id = "";
-            state.blogImage = "";
-        }
-    }
+            state.image = "";
+            state.authorId = "";
+            // state.likeCount = 0;
+            // state.likers = [];
+            // state.comments = [];
+        },
+    },
+});
 
-})
-
-export const { setEditableBlog,clearSetEditableBlog } = blogSlice.actions;
-export default blogSlice.reducer;
+export const { setEditableArticle, clearEditableArticle } = articleSlice.actions;
+export default articleSlice.reducer;

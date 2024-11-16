@@ -1,8 +1,13 @@
 
+import { User } from "@/app/dashboard/layout";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState = {
-    user: null, 
+interface IInitialState {
+    user: User | null;
+}
+
+const initialState: IInitialState = {
+    user: null,
 };
 
 // Create the slice
@@ -16,6 +21,7 @@ const authSlice = createSlice({
         },
         logout: (state) => {
             state.user = null;
+            localStorage.removeItem("token")
         },
     },
 });

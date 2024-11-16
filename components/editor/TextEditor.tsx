@@ -1,22 +1,47 @@
-
-
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SunEditor from "suneditor-react";
 import "suneditor/dist/css/suneditor.min.css";
 import "./TextEditor.css";
 import { Button } from "../ui/button";
 import { CircleX } from "lucide-react";
-import { useCreateBlogMutation } from "@/redux/features/api/blogApi";
+import { useCreateBlogMutation, useUpdateBlogMutation } from "@/redux/features/api/blogApi";
 import toast from "react-hot-toast";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import Image from "next/image";
+import { clearEditableArticle } from "@/redux/features/slices/blogSlice";
 
 const TextEditor: React.FC = () => {
-    const [ editorContent, setEditorContent ] = useState<string>("");
-    const [ blogTitle, setBlogTitle ] = useState<string>("");
+    const editableBlog = useAppSelector((state) => state.blog);
+    const [ editorContent, setEditorContent ] = useState<string>(editableBlog.content || "");
+    const [ blogTitle, setBlogTitle ] = useState<string>(editableBlog.title || "");
+    const [ blogImage, setBlogImage ] = useState<File | null>(null);
+    const [ imagePreview, setImagePreview ] = useState<string | null>(editableBlog.image || null);
     const [ showPreview, setShowPreview ] = useState(false);
     const [ createBlogMutation, { isLoading: createBlogLoading } ] = useCreateBlogMutation();
+    const [ updateBlogMutation, { isLoading: updateBlogLoading } ] = useUpdateBlogMutation();
+
+    const user = useAppSelector((state) => state.auth.user);
+    const dispatch = useAppDispatch();
+    const [ isEditMode, setIsEditMode ] = useState<boolean>(editableBlog?.title ? true : false);
+    // We will use a flag to track if the component is mounting
+    const [ isMounted, setIsMounted ] = useState<boolean>(false);
+
+    // Set up a useEffect to manage the mount/unmount state
+    useEffect(() => {
+        setIsMounted(true);
+
+        return () => {
+            if (isMounted) {
+                dispatch(clearEditableArticle()); // Only clear the editable state when unmounting
+            }
+        };
+    }, [ dispatch, isMounted ]);
+
+
+    console.log({ editableBlog })
 
     const handleTitleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         setBlogTitle(event.target.value);
@@ -26,35 +51,59 @@ const TextEditor: React.FC = () => {
         setEditorContent(content);
     };
 
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[ 0 ] || null;
+        setBlogImage(file);
+        setImagePreview(file ? URL.createObjectURL(file) : null);
+    };
+
     const handleSaveBlog = async () => {
-        const artileCreationsLoading = toast.loading("Creating Article")
+        const articleCreationLoading = toast.loading("Article Saving...");
         try {
             if (!blogTitle || !editorContent) {
                 toast.error("Please fill required information!");
                 return;
             }
 
-            const blogData = {
-                authorId: "6732ca2128299c6a8049e0cd",
-                title: blogTitle,
-                content: editorContent,
-            };
+            const blogData = new FormData();
+            blogData.append("authorId", user?.id as string);
+            blogData.append("title", blogTitle);
+            blogData.append("content", editorContent);
+            if (blogImage) {
+                blogData.append("image", blogImage);
+            }
+            blogData.append("id", editableBlog.id as string);
+            console.log(editableBlog.id)
 
-            const response = await createBlogMutation(blogData)
-            if (response?.error) {
-                toast.error("Error creating")
+            // handle edit and create article logic
+            if (isEditMode) {
+                const response = await updateBlogMutation(blogData);
+                if(response.error){
+                    toast.error("Failed to update blog");
+                    return;
+                }
+                toast.success("Blog Updated Successfully.");
+                setBlogTitle("");
+                setEditorContent("");
+                setBlogImage(null);
+                setImagePreview(null);
+                return
+            }
+            const response = await createBlogMutation(blogData);
+            if ((response as any)?.error) {
+                toast.error("Error creating blog");
                 return;
             }
 
-            toast.success("Article Created Successfully.")
+            toast.success("Article Created Successfully.");
             setBlogTitle("");
             setEditorContent("");
-            console.log("Blog Data:", blogData);
-            // Later: Call the API to send data to the backend
+            setBlogImage(null);
+            setImagePreview(null);
         } catch (error) {
-            toast.error("Error creating")
+            toast.error("Error creating blog");
         } finally {
-            toast.dismiss(artileCreationsLoading);
+            toast.dismiss(articleCreationLoading);
         }
     };
 
@@ -76,6 +125,31 @@ const TextEditor: React.FC = () => {
                     placeholder="Enter Blog Title"
                     className="blog-title"
                 />
+            </div>
+
+            {/* Image Upload Section */}
+            <div className="form-group">
+                <label className="input-label" htmlFor="blog-image">
+                    Upload Blog Image
+                </label>
+                <input
+                    id="blog-image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="blog-image-input"
+                />
+                {imagePreview && (
+                    <div className="image-preview mt-4">
+                        <Image
+                            src={imagePreview}
+                            alt="Blog Preview"
+                            width={128}
+                            height={128}
+                            className="object-cover rounded-lg shadow-md"
+                        />
+                    </div>
+                )}
             </div>
 
             {/* SunEditor for Blog Content */}
@@ -149,6 +223,19 @@ const TextEditor: React.FC = () => {
                                     {blogTitle}
                                 </h4>
 
+                                {/* Blog Image */}
+                                {imagePreview && (
+                                    <div className="flex justify-center mb-6">
+                                        <Image
+                                            src={imagePreview}
+                                            alt="Blog Preview"
+                                            width={384}
+                                            height={384}
+                                            className="object-cover rounded-lg shadow-md"
+                                        />
+                                    </div>
+                                )}
+
                                 {/* Blog Content */}
                                 <div className="prose max-w-none text-gray-700">
                                     <div dangerouslySetInnerHTML={{ __html: editorContent }} />
@@ -163,5 +250,3 @@ const TextEditor: React.FC = () => {
 };
 
 export default TextEditor;
-
-

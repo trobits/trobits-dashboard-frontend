@@ -14,7 +14,7 @@ const blogApi = baseApi.injectEndpoints({
         getAllBlogs: build.query({
             query: () => {
                 return {
-                    url: "/blog/all-blogs",
+                    url: "/article/all-article",
                     method: "GET"
                 }
             },
@@ -22,11 +22,11 @@ const blogApi = baseApi.injectEndpoints({
         }),
         updateBlog: build.mutation({
             query: (data) => {
-
+                console.log({data})
                 return {
-                    url: `/blog/update-blog/${data.id}`,
+                    url: `/article/update-article`,
                     method: "PATCH",
-                    body: data.formData
+                    body: data
                 }
             },
             invalidatesTags: [ 'blog' ]
@@ -35,22 +35,26 @@ const blogApi = baseApi.injectEndpoints({
             query: (id) => {
 
                 return {
-                    url: `/blog/delete-blog/${id}`,
+                    url: `/article/delete-article/${id}`,
                     method: "DELETE",
                 }
             },
             invalidatesTags: [ 'blog' ]
         }),
-        getAllSubscriber: build.query({
-            query: () => {
-                return {
-                    url: "/subscriber/all-subscriber",
-                    method: "GET"
-                }
-            },
-        })
+        // getAllSubscriber: build.query({
+        //     query: () => {
+        //         return {
+        //             url: "/subscriber/all-subscriber",
+        //             method: "GET"
+        //         }
+        //     },
+        // })
 
     })
 })
 
-export const { useCreateBlogMutation, useGetAllSubscriberQuery, useGetAllBlogsQuery, useUpdateBlogMutation, useDeleteBlogMutation } = blogApi;
+export const { useCreateBlogMutation,
+    // useGetAllSubscriberQuery,
+        useGetAllBlogsQuery,
+    useUpdateBlogMutation,
+    useDeleteBlogMutation } = blogApi;

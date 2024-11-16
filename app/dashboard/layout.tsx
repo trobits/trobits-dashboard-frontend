@@ -1,14 +1,78 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 
 "use client";
 import { Button } from '@/components/ui/button';
-import { useLazyLogoutQuery } from '@/redux/features/api/authApi';
-import { logout } from '@/redux/features/slices/authSlice';
+import { useLazyGetUserByIdQuery, useLazyLogoutQuery } from '@/redux/features/api/authApi';
+import { logout, setUser } from '@/redux/features/slices/authSlice';
 import { useAppDispatch } from '@/redux/hooks';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { FiMenu } from 'react-icons/fi';
+import { jwtDecode } from "jwt-decode";
+import toast from 'react-hot-toast';
+
+export interface User {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    profileImage: string;
+    isDeleted: boolean;
+    posts: Post[];
+    coverImage: string;
+    role: "USER" | "ADMIN";
+    followers: string[];
+    following: string[];
+    comments: Comment[];
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface Post {
+    id: string;
+    content: string;
+    createdAt: string;
+    updatedAt: string;
+    authorId: string;
+    image?: string;
+    video?: string;
+    likeCount: number;
+    likers: string[];
+    topicId?: string | null;
+    category: "IMAGE" | "VIDEO";
+    comments: Comment[];
+}
+
+export interface Comment {
+    id: string;
+    content: string;
+    createdAt: string;
+    updatedAt: string;
+    authorId: string;
+    postId?: string;
+    articleId?: string | null;
+    likers: string[];
+    dislikers: string[];
+    likeCount: number;
+    dislikeCount: number;
+}
+
+export interface Article {
+    id: string;
+    title: string;
+    content: string;
+    authorId: string;
+    createdAt: Date;
+    updatedAt: Date;
+    image?: string;
+    likeCount: number;
+    likers: string[];
+    comments: Comment[];
+}
+
+
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
     const pathname = usePathname();
@@ -17,6 +81,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
     const [ triggerLogout, { isLoading } ] = useLazyLogoutQuery();
     const [ isSidebarOpen, setIsSidebarOpen ] = useState(false);
+    const [ triggerGetUserById, { isLoading: getUserByIdLoading } ] = useLazyGetUserByIdQuery()
 
     const handleLogOut = async () => {
         try {
@@ -30,9 +95,28 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     };
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (!token) router.push('/');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        const verifyUser = async () => {
+
+            try {
+                const token = localStorage.getItem('token');
+
+                if (!token) router.push('/');
+                const decodedInformation: Partial<User> = jwtDecode(token as string)
+                const response = await triggerGetUserById(decodedInformation.id).unwrap()
+                const currentUser: User = response?.data
+                if (currentUser?.role !== "ADMIN") {
+                    dispatch(logout());
+                    router.push("/");
+                    toast.error("You don't have admin rights.")
+                }
+                dispatch(setUser({ user: currentUser }))
+            } catch (error) {
+                router.push("/")
+                toast.error("Login with valid information.")
+            }
+        }
+        verifyUser();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleMenuItemClick = () => {
@@ -62,7 +146,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                         <li>
                             <Link href="/dashboard/shiblunc" passHref>
                                 <Button
-                                    className={`w-full justify-start text-left px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors ${pathname === '/dashboard/allblogs' ? 'bg-teal-700 text-white' : 'bg-gray-800 text-gray-300'
+                                    className={`w-full justify-start text-left px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors ${pathname === '/dashboard/shiblunc' ? 'bg-teal-700 text-white' : 'bg-gray-800 text-gray-300'
                                         }`}
                                     onClick={handleMenuItemClick}
                                 >
@@ -95,7 +179,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                         <li>
                             <Link href="/dashboard/allSubscriber" passHref>
                                 <Button
-                                    className={`w-full justify-start text-left px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors ${pathname === '/dashboard/addblog' ? 'bg-teal-700 text-white' : 'bg-gray-800 text-gray-300'
+                                    className={`w-full justify-start text-left px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors ${pathname === '/dashboard/allSubscriber' ? 'bg-teal-700 text-white' : 'bg-gray-800 text-gray-300'
                                         }`}
                                     onClick={handleMenuItemClick}
                                 >
@@ -130,7 +214,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </div>
 
             {/* Main Content */}
-            <main className={`flex-1 h-full overflow-y-auto lg:ml-4 p-10 bg-white shadow-inner rounded-lg transition-all duration-300`}>
+            <main className={`flex-1 h-full overflow-y-auto lg:ml-4 p-2 md:p-10 bg-white shadow-inner rounded-lg transition-all duration-300`}>
                 <h1 className="text-4xl font-bold text-teal-700 mb-6">Blog Dashboard</h1>
                 {children}
             </main>

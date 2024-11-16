@@ -18,8 +18,18 @@ const authApi = baseApi.injectEndpoints({
                     method: "GET"
                 }
             }
-        })
+        }),
+        getUserById: build.query({
+            query: (userId) => {
+                return {
+                    url: `/user/singleUser/${userId}`,
+                    method: "GET",
+
+                }
+            },
+            providesTags: [ ]
+        }),
     })
 })
 
-export const { useLoginUserMutation,useLogoutQuery,useLazyLogoutQuery } = authApi;
+export const { useGetUserByIdQuery,useLoginUserMutation,useLazyGetUserByIdQuery,useLogoutQuery,useLazyLogoutQuery } = authApi;

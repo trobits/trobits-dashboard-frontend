@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import { LockIcon, UserIcon } from "lucide-react";
 import { useLoginUserMutation } from "@/redux/features/api/authApi";
@@ -21,7 +22,6 @@ export default function AdminLoginPage() {
         email: email.value,
         password: password.value,
       }).unwrap();
-      console.log(result)
 
       if (result?.error) {
         toast.error(result.error.response?.data?.message || "Login failed");
@@ -32,8 +32,9 @@ export default function AdminLoginPage() {
       localStorage.setItem("token", result.token.accessToken);
       toast.success("Successfully logged in.");
     } catch (error) {
-      toast.error("Failed to login");
-      console.error(error);
+      console.log({ error })
+
+      toast.error((error as { data: { message: string } }).data?.message || "Failed to login");
     }
   };
 
@@ -91,7 +92,7 @@ export default function AdminLoginPage() {
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-xl text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform transition hover:scale-105 active:scale-95"
               >
                 <Link href="/dashboard">
-                {userSignInLoading ? "Signing in..." : "Sign in"}
+                  {userSignInLoading ? "Signing in..." : "Sign in"}
                 </Link>
               </button>
             </div>
