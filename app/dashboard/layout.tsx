@@ -177,13 +177,35 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                             </Link>
                         </li>
                         <li>
-                            <Link href="/dashboard/allSubscriber" passHref>
+                            <Link href="/dashboard/recommendedUsers" passHref>
                                 <Button
-                                    className={`w-full justify-start text-left px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors ${pathname === '/dashboard/allSubscriber' ? 'bg-teal-700 text-white' : 'bg-gray-800 text-gray-300'
+                                    className={`w-full justify-start text-left px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors ${pathname === '/dashboard/recommendedUsers' ? 'bg-teal-700 text-white' : 'bg-gray-800 text-gray-300'
                                         }`}
                                     onClick={handleMenuItemClick}
                                 >
-                                    Manage Users
+                                    Recommended Users
+                                </Button>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href="/dashboard/verifiedUsers" passHref>
+                                <Button
+                                    className={`w-full justify-start text-left px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors ${pathname === '/dashboard/verifiedUsers' ? 'bg-teal-700 text-white' : 'bg-gray-800 text-gray-300'
+                                        }`}
+                                    onClick={handleMenuItemClick}
+                                >
+                                    Verified Users
+                                </Button>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href="/dashboard/blockedUsers" passHref>
+                                <Button
+                                    className={`w-full justify-start text-left px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors ${pathname === '/dashboard/blockedUsers' ? 'bg-teal-700 text-white' : 'bg-gray-800 text-gray-300'
+                                        }`}
+                                    onClick={handleMenuItemClick}
+                                >
+                                    Blocked Users
                                 </Button>
                             </Link>
                         </li>

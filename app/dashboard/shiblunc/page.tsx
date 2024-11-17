@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
+import Loading from "@/components/shared/Loading";
 import { useGetLuncInformationQuery, useGetShibaInformationQuery, useUpdateLuncMutation, useUpdateShibaMutation } from "@/redux/features/api/currencyApi";
 import { useState, useEffect } from "react";
 
@@ -74,6 +75,10 @@ const CryptoTable = () => {
     setIsEditing(false); // Exit edit mode after saving
   };
 
+  if (shibaDataLoading || luncDataLoading) {
+    return <Loading />;
+  }
+
   const renderTable = (
     cryptoData: Shiba | Lunc | null,
     cryptoType: "SHIB" | "LUNC"
@@ -100,14 +105,14 @@ const CryptoTable = () => {
                   {isEditing ? (
                     <input
                       type="text"
-                      value={cryptoData[ field as keyof Shiba | keyof Lunc ] || ""}
+                      value={(cryptoData[ field as keyof Shiba | keyof Lunc ] as string) || ""}
                       onChange={(e) =>
                         handleChange(cryptoType, field as keyof Shiba | keyof Lunc, e.target.value)
                       }
                       className="flex-grow bg-gray-50 text-gray-700 px-2 py-1 rounded border focus:ring-2 focus:ring-blue-400"
                     />
                   ) : (
-                    <span className="text-gray-700">{cryptoData[ field as keyof Shiba | keyof Lunc ]}</span>
+                    <span className="text-gray-700">{(cryptoData[ field as keyof Shiba | keyof Lunc ] as string)}</span>
                   )}
                 </td>
               </tr>
