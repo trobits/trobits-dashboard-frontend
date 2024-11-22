@@ -6,7 +6,8 @@ export const baseApi = createApi({
     reducerPath: "baseApi",
     baseQuery: fetchBaseQuery({
         // baseUrl: "http://localhost:5000/api/v1",
-        baseUrl: "https://sisiku-backend.vercel.app/api/v1",
+        // baseUrl: "https://sisiku-backend.vercel.app/api/v1",
+        baseUrl: "https://api.trobits.com/api/v1",
         // credentials: "include",
         prepareHeaders: (headers, { }) => {
             const token = localStorage.getItem("token");
