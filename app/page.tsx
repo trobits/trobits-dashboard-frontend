@@ -32,7 +32,6 @@ export default function AdminLoginPage() {
       localStorage.setItem("token", result.token.accessToken);
       toast.success("Successfully logged in.");
     } catch (error) {
-      console.log({ error })
 
       toast.error((error as { data: { message: string } }).data?.message || "Failed to login");
     }

@@ -1,16 +1,13 @@
 
-
-
-
-// /* eslint-disable @typescript-eslint/no-unused-vars */
-// /* eslint-disable @typescript-eslint/no-explicit-any */
+// // /* eslint-disable @typescript-eslint/no-unused-vars */
+// // /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // "use client";
+// import React, { useEffect, useMemo, useState } from "react";
 // import { Button } from "@/components/ui/button";
 // import { Card } from "@/components/ui/card";
-// import { Edit, Eye, Trash2, XCircle } from "lucide-react";
+// import { Edit, Eye, Trash2, XCircle, Search } from "lucide-react";
 // import { useDeleteBlogMutation, useGetAllBlogsQuery } from "@/redux/features/api/blogApi";
-// import React, { useState } from "react";
 // import Image from "next/image";
 // import { useAppDispatch } from "@/redux/hooks";
 // import { useRouter } from "next/navigation";
@@ -18,18 +15,41 @@
 // import Loading from "@/components/shared/Loading";
 // import { Article } from "../layout";
 // import { setEditableArticle } from "@/redux/features/slices/blogSlice";
+// import { debounce } from "lodash";
 
 // const AllArticlePage = () => {
-//   const { data, isLoading } = useGetAllBlogsQuery([]);
+//   const { data, isLoading } = useGetAllBlogsQuery("");
 //   const [ showPreview, setShowPreview ] = useState<boolean>(false);
 //   const [ selectedArticle, setSelectedArticle ] = useState<Article | null>(null);
 //   const [ deleteArticle ] = useDeleteBlogMutation();
+//   const [ searchTerm, setSearchTerm ] = useState<string>("");
+//   const [ filteredArticles, setFilteredArticles ] = useState<Article[]>([]);
 //   const dispatch = useAppDispatch();
 //   const router = useRouter();
 
+
+
+//   const articles = useMemo(() => data?.data || [], [ data?.data ]);
+
+//   // Initialize filtered articles when articles data is fetched
+//   useEffect(() => {
+//     setFilteredArticles(articles);
+//   }, [articles]);
+
+//   const debouncedSearch = debounce((term: string) => {
+//     const filtered = articles.filter((article:Article) =>
+//       article.title.toLowerCase().includes(term.toLowerCase())
+//     );
+//     setFilteredArticles(filtered);
+//   }, 300);
+
 //   if (isLoading) return <Loading />;
 
-//   const articles = data?.data;
+//   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const value = e.target.value;
+//     setSearchTerm(value);
+//     debouncedSearch(value);
+//   };
 
 //   const handlePreview = (article: Article) => {
 //     setSelectedArticle(article);
@@ -37,7 +57,6 @@
 //   };
 
 //   const handleEditArticle = (article: Article) => {
-//     console.log({ article });
 //     dispatch(setEditableArticle(article));
 //     router.push("/dashboard/addblog");
 //   };
@@ -83,14 +102,25 @@
 //     );
 //   };
 
-//   if (!articles?.length) {
-//     return <p>No articles found</p>;
-//   }
-
 //   return (
 //     <div className="space-y-4 w-full">
-//       {articles &&
-//         articles.map((article: Article) => (
+//       {/* Search Bar */}
+//       <div className="flex justify-between w-full items-center mb-4">
+//         <div className="relative flex w-full items-center bg-[#000000c5] font-bold text-white border-4 border-cyan-500 px-3 py-2 rounded-lg">
+//           <Search className="h-5 w-5 " />
+//           <input
+//             type="text"
+//             value={searchTerm}
+//             onChange={handleSearchChange}
+//             placeholder="Search by title..."
+//             className="bg-transparent outline-none w-full pl-2 "
+//           />
+//         </div>
+//       </div>
+
+//       {/* Articles List */}
+//       {filteredArticles.length ? (
+//         filteredArticles.map((article: Article) => (
 //           <Card
 //             key={article.id}
 //             className="flex flex-col md:flex-row shadow-md rounded-lg overflow-hidden"
@@ -99,14 +129,14 @@
 //             <div className="w-full md:w-32 h-48 md:h-32 flex items-center justify-center border-4 border-cyan-600 m-1 rounded-lg p-1 bg-gray-200">
 //               {article.image ? (
 //                 <Image
-//                   height={128} // Predefined size for the image
+//                   height={128}
 //                   width={128}
 //                   src={article.image}
 //                   alt={article.title}
 //                   className="object-cover w-full h-full"
 //                 />
 //               ) : (
-//                 <div className="text-gray-400 text-sm font-medium">Blog</div>
+//                 <div className="text-gray-400 text-sm font-medium">No Image</div>
 //               )}
 //             </div>
 
@@ -144,7 +174,14 @@
 //               </div>
 //             </div>
 //           </Card>
-//         ))}
+//         ))
+//       ) : searchTerm ? (
+//         // Show "No Results" if search term exists but no articles are found
+//         <p className="text-center text-gray-500">No articles match your search.</p>
+//       ) : (
+//         // Show "No Articles Found" if there are no articles at all
+//         <p className="text-center text-gray-500">No articles found.</p>
+//       )}
 
 //       {/* Preview Modal */}
 //       {showPreview && selectedArticle && (
@@ -210,6 +247,8 @@
 
 
 
+// /* eslint-disable @typescript-eslint/no-unused-vars */
+// /* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
@@ -227,18 +266,28 @@ import { setEditableArticle } from "@/redux/features/slices/blogSlice";
 import { debounce } from "lodash";
 
 const AllArticlePage = () => {
-  const { data, isLoading } = useGetAllBlogsQuery([]);
-  const [ showPreview, setShowPreview ] = useState<boolean>(false);
-  const [ selectedArticle, setSelectedArticle ] = useState<Article | null>(null);
-  const [ deleteArticle ] = useDeleteBlogMutation();
-  const [ searchTerm, setSearchTerm ] = useState<string>("");
-  const [ filteredArticles, setFilteredArticles ] = useState<Article[]>([]);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  // Total pages state
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const { data, isLoading } = useGetAllBlogsQuery(`?page=${currentPage}&limit=15`);
+  const [showPreview, setShowPreview] = useState<boolean>(false);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [deleteArticle] = useDeleteBlogMutation();
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
+
   const dispatch = useAppDispatch();
   const router = useRouter();
 
+  const articles = useMemo(() => data?.data || [], [data?.data]);
 
-
-  const articles = useMemo(() => data?.data || [], [ data?.data ]);
+  useEffect(() => {
+    if (data?.meta) {
+      setCurrentPage(data.meta.page);
+      setTotalPages(data.meta.totalPages);
+    }
+  }, [data]);
 
   // Initialize filtered articles when articles data is fetched
   useEffect(() => {
@@ -246,7 +295,7 @@ const AllArticlePage = () => {
   }, [articles]);
 
   const debouncedSearch = debounce((term: string) => {
-    const filtered = articles.filter((article:Article) =>
+    const filtered = articles.filter((article: Article) =>
       article.title.toLowerCase().includes(term.toLowerCase())
     );
     setFilteredArticles(filtered);
@@ -286,7 +335,8 @@ const AllArticlePage = () => {
                     toast.error("Failed to delete article!");
                   } else if (result?.data?.success) {
                     toast.success("Article deleted successfully!");
-                    toast.dismiss(t.id); // Dismiss the confirmation toast
+                    // Dismiss the confirmation toast
+                    toast.dismiss(t.id); 
                   }
                 } catch {
                   toast.error("Failed to delete article!");
@@ -298,17 +348,39 @@ const AllArticlePage = () => {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => toast.dismiss(t.id)} // Dismiss the confirmation toast
+              // Dismiss the confirmation toast
+              onClick={() => toast.dismiss(t.id)} 
             >
               No
             </Button>
           </div>
         </div>
       ),
+      // Keep the toast open until user responds
       {
-        duration: Infinity, // Keep the toast open until user responds
+        duration: Infinity, 
       }
     );
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => {
+        const nextPage = prev + 1;
+        console.log("Current Page:", nextPage);
+        return nextPage;
+      });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => {
+        const prevPage = prev - 1;
+        console.log("Current Page:", prevPage);
+        return prevPage;
+      });
+    }
   };
 
   return (
@@ -391,6 +463,32 @@ const AllArticlePage = () => {
         // Show "No Articles Found" if there are no articles at all
         <p className="text-center text-gray-500">No articles found.</p>
       )}
+
+ {/* Pagination Controls */}
+ <div className="flex justify-center items-center mt-4">
+        <Button
+          size="sm"
+          variant="outline"
+          className={`font-bold mr-4 text-white ${currentPage === 1 ? "bg-gray-500 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"}`}
+          disabled={currentPage === 1}
+          onClick={handlePrevPage}
+        >
+          Previous
+        </Button>
+        <p className="text-gray-700 font-medium">
+          Page {currentPage} of {totalPages}
+        </p>
+        <Button
+          size="sm"
+          variant="outline"
+          className={`font-bold ml-4 text-white ${currentPage === totalPages ? "bg-gray-500 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"}`}
+          disabled={currentPage === totalPages}
+          onClick={handleNextPage}
+        >
+          Next
+        </Button>
+      </div>
+
 
       {/* Preview Modal */}
       {showPreview && selectedArticle && (

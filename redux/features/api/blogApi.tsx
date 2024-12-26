@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { baseApi } from "./baseApi";
 
 const blogApi = baseApi.injectEndpoints({
@@ -12,9 +13,9 @@ const blogApi = baseApi.injectEndpoints({
             }
         }),
         getAllBlogs: build.query({
-            query: () => {
+            query: (data) => {
                 return {
-                    url: "/article/all-article",
+                    url: `/article/all-article${data}`,
                     method: "GET"
                 }
             },

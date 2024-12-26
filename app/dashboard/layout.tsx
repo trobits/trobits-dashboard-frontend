@@ -155,6 +155,17 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                             </Link>
                         </li>
                         <li>
+                            <Link href="/dashboard/archive" passHref>
+                                <Button
+                                    className={`w-full justify-start text-left px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors ${pathname === '/dashboard/archive' ? 'bg-teal-700 text-white' : 'bg-gray-800 text-gray-300'
+                                        }`}
+                                    onClick={handleMenuItemClick}
+                                >
+                                    Burns Archive
+                                </Button>
+                            </Link>
+                        </li>
+                        <li>
                             <Link href="/dashboard/allblogs" passHref>
                                 <Button
                                     className={`w-full justify-start text-left px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors ${pathname === '/dashboard/allblogs' ? 'bg-teal-700 text-white' : 'bg-gray-800 text-gray-300'

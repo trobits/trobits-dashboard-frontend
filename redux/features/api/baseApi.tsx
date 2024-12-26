@@ -5,10 +5,10 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const baseApi = createApi({
     reducerPath: "baseApi",
     baseQuery: fetchBaseQuery({
-        // baseUrl: "http://localhost:5000/api/v1",
+        // baseUrl: "http://localhost:3000/api/v1",
         // baseUrl: "https://sisiku-backend.vercel.app/api/v1",
         baseUrl: "https://api.trobits.com/api/v1",
-        // credentials: "include",
+        credentials: "include",
         prepareHeaders: (headers, { }) => {
             const token = localStorage.getItem("token");
             if (token) {
@@ -19,7 +19,7 @@ export const baseApi = createApi({
         },
       
     }),
-    tagTypes: [ "blog", "user","recommended-user","verified-user","blocked-user"],
+    tagTypes: [ "blog", "user","recommended-user","verified-user","lunc-burn","blocked-user","shiba-burn"],
     endpoints: () => ({}),
 });
 

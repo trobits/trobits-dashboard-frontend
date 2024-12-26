@@ -41,8 +41,6 @@ const TextEditor: React.FC = () => {
     }, [ dispatch, isMounted ]);
 
 
-    console.log({ editableBlog })
-
     const handleTitleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         setBlogTitle(event.target.value);
     };
